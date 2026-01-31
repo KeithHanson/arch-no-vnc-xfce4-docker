@@ -66,5 +66,7 @@ ENTRYPOINT ["/tini", "--"]
 # Prepare X11, x11vnc, mate and noVNC from supervisor
 COPY supervisord.ini /etc/supervisor.d/supervisord.ini
 
+WORKDIR /home/user
+
 # Launch X11, x11vnc, mate and noVNC from supervisor
 CMD ["sudo", "/usr/bin/supervisord"]
