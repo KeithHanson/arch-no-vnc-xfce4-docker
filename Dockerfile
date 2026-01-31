@@ -1,0 +1,66 @@
+FROM archlinux:latest
+MAINTAINER keith <keith@keithhanson.io>
+
+# Install packages
+RUN pacman -Sy --needed --noconfirm \
+	facter \
+	git \
+  base-devel \
+	xfce4 \
+	net-tools \
+	python \
+  python-numpy \
+	supervisor \
+	terminator \
+	vim \
+	x11vnc \
+	xorg-server \
+	xorg-server-xvfb
+
+# Update all packages
+RUN pacman -Syu --noconfirm
+
+# Create non-root user for yay
+RUN useradd -m -G wheel -s /bin/bash user
+RUN echo '%wheel ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+RUN mkdir src
+
+WORKDIR src
+
+RUN git clone https://github.com/novnc/noVNC.git
+
+# Install yay as non-root user
+USER user
+WORKDIR /home/user
+RUN git clone https://aur.archlinux.org/yay.git && \
+    cd yay && \
+    makepkg -si --noconfirm && \
+    cd .. && \
+    rm -rf yay
+
+RUN yay -Syu google-chrome --needed --noconfirm
+
+# Install AUR packages here
+# RUN yay -S --noconfirm --needed <your-package>
+
+# Switch back to root for rest of setup
+USER root
+WORKDIR /src
+
+# Not seems to work, but...
+RUN export DISPLAY=:0.0
+
+# Be sure that the noVNC port is exposed
+EXPOSE 8080
+
+ENV TINI_VERSION=v0.19.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN chmod +x /tini
+ENTRYPOINT ["/tini", "--"]
+
+# Prepare X11, x11vnc, mate and noVNC from supervisor
+COPY supervisord.ini /etc/supervisor.d/supervisord.ini
+
+# Launch X11, x11vnc, mate and noVNC from supervisor
+CMD ["sudo", "/usr/bin/supervisord"]

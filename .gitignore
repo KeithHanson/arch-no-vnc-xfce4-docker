@@ -1,0 +1,18 @@
+# User volume mount
+user/
+
+# Docker
+*.log
+
+# Editor files
+*.swp
+*.swo
+*~
+.*.sw*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+noVNC/
