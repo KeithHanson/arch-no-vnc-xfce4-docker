@@ -1,21 +1,30 @@
 FROM archlinux:latest
 MAINTAINER keith <keith@keithhanson.io>
 
+# Reset and reinitialize GPG keyring
+RUN rm -rf /etc/pacman.d/gnupg
+RUN pacman-key --init
+RUN pacman-key --populate archlinux
+RUN pacman-key --refresh-keys
+RUN pacman -Syyu archlinux-keyring --noconfirm
+
 # Install packages
 RUN pacman -Sy --needed --noconfirm \
-	facter \
-	git \
-  base-devel \
-	xfce4 \
-	net-tools \
-	python \
-  python-numpy \
-	supervisor \
-	terminator \
-	vim \
-	x11vnc \
-	xorg-server \
-	xorg-server-xvfb
+	    facter \
+	    git \
+	    base-devel \
+	    xfce4 \
+	    net-tools \
+	    python \
+	    python-numpy \
+	    supervisor \
+	    terminator \
+	    vim \
+	    x11vnc \
+	    xorg-server \
+	    xorg-server-xvfb \
+	    adwaita-icon-theme gdk-pixbuf2 librsvg shared-mime-info \
+	    elementary-icon-theme
 
 # Update all packages
 RUN pacman -Syu --noconfirm
@@ -38,11 +47,6 @@ RUN git clone https://aur.archlinux.org/yay.git && \
     makepkg -si --noconfirm && \
     cd .. && \
     rm -rf yay
-
-RUN yay -Syu google-chrome --needed --noconfirm
-
-# Install AUR packages here
-# RUN yay -S --noconfirm --needed <your-package>
 
 # Switch back to root for rest of setup
 USER root
